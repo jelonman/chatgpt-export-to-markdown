@@ -22,6 +22,21 @@ from datetime import datetime, timezone
 ROLE_LABELS = {"user": "You", "assistant": "ChatGPT", "system": "System", "tool": "Tool"}
 
 
+import zipfile
+
+def _load_export(path):
+    """Load conversations from a ChatGPT export — accepts the raw .zip or conversations.json."""
+    if path.lower().endswith(".zip"):
+        with zipfile.ZipFile(path) as z:
+            name = next((n for n in z.namelist() if n.endswith("conversations.json")), None)
+            if not name:
+                raise SystemExit("No conversations.json found inside the zip.")
+            with z.open(name) as f:
+                return json.loads(f.read().decode("utf-8"))
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
+
+
 def _slug(text, fallback):
     text = (text or "").strip() or fallback
     s = re.sub(r"[^\w\- ]+", "", text).strip().replace(" ", "-").lower()
@@ -101,12 +116,11 @@ def convo_to_markdown(convo):
 
 def main():
     ap = argparse.ArgumentParser(description="Convert a ChatGPT conversations.json export to Markdown.")
-    ap.add_argument("input", help="Path to conversations.json from your ChatGPT export")
+    ap.add_argument("input", help="Path to conversations.json OR the export .zip")
     ap.add_argument("-o", "--out", default="chatgpt-markdown", help="Output directory (default: chatgpt-markdown)")
     args = ap.parse_args()
 
-    with open(args.input, encoding="utf-8") as f:
-        data = json.load(f)
+    data = _load_export(args.input)
     convos = data if isinstance(data, list) else data.get("conversations", [data])
 
     os.makedirs(args.out, exist_ok=True)

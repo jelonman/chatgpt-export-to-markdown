@@ -7,7 +7,9 @@ emails you a ZIP containing `conversations.json`. That file is a machine format 
 read. This tiny script converts it into tidy `.md` files you can browse, grep, commit to a repo,
 or feed into anything that reads Markdown.
 
-- ✅ No dependencies — Python 3 standard library only
+- ✅ ✅ Accepts the raw export **.zip** or the extracted `conversations.json`
+
+No dependencies — Python 3 standard library only
 - ✅ Handles the **modern export** (mapping-tree format) **and** the older flat `messages` format
 - ✅ One `.md` per conversation, messages in order, with titles and timestamps
 
